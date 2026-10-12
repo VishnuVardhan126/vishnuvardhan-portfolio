@@ -190,11 +190,12 @@ tr:last-child td{border-bottom:0}
 .content-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:8px}
 .slot{aspect-ratio:9/12;max-width:100%;border:1px dashed #3a3e3b;border-radius:14px;display:grid;place-content:center;text-align:center;padding:18px;gap:6px;color:var(--muted);font-size:14px}
 .slot b{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:500}
-.reels{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:8px}
+.reels{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:8px;align-items:start}
 .reel{min-width:0}
-.reel-frame{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg-raise);min-height:420px;display:grid}
-.reel-frame iframe{width:100%;height:640px;border:0;display:block;background:var(--bg-raise)}
-.reel-card{display:grid;place-content:center;justify-items:center;gap:18px;text-align:center;text-decoration:none;color:var(--fg);padding:32px;min-height:420px;transition:background .25s}
+.reel-frame{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg-raise);display:grid;align-content:start}
+.reel-frame.live{border:0;background:transparent;border-radius:0;overflow:visible}
+.reel-frame iframe{width:100%;height:560px;border:0;display:block;border-radius:14px;background:transparent;color-scheme:normal}
+.reel-card{display:grid;place-content:center;justify-items:center;gap:18px;text-align:center;text-decoration:none;color:var(--fg);padding:32px;aspect-ratio:4/3;transition:background .25s}
 .reel-card:hover{background:#1c1f1d}
 .reel-card b{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:500}
 .reel-card span:last-child{font-weight:600}
@@ -628,7 +629,15 @@ footer{border-top:1px solid var(--line);padding-block:32px;color:var(--muted);fo
       f.src='https://www.instagram.com/reel/'+r.getAttribute('data-id')+'/embed/';
       f.loading='lazy';f.title='Instagram reel by Vishnu Vardhan';f.allowFullscreen=true;
       f.setAttribute('allow','encrypted-media; fullscreen');
-      var fr=r.querySelector('.reel-frame');fr.textContent='';fr.appendChild(f);
+      var fr=r.querySelector('.reel-frame');fr.textContent='';fr.classList.add('live');fr.appendChild(f);
+      /* 4:3 reel: header ~70px + video at 3/4 of width + footer; Instagram then reports the exact height */
+      f.style.height=Math.round(70+fr.clientWidth*0.75+110)+'px';
+    });
+    window.addEventListener('message',function(e){
+      if(e.origin!=='https://www.instagram.com')return;
+      var d=e.data;try{if(typeof d==='string')d=JSON.parse(d)}catch(x){return}
+      if(!d||d.type!=='MEASURE'||!d.details||!d.details.height)return;
+      [].forEach.call(document.querySelectorAll('.reel iframe'),function(f){if(f.contentWindow===e.source)f.style.height=Math.ceil(d.details.height)+'px'});
     });
   }
   /* mobile menu */

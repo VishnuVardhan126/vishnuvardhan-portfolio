@@ -607,6 +607,9 @@ footer{border-top:1px solid var(--line);padding-block:32px;color:var(--muted);fo
 
 <script>
 (function(){
+  /* always open at the top */
+  try{if('scrollRestoration' in history)history.scrollRestoration='manual'}catch(x){}
+  if(!location.hash){window.scrollTo(0,0);window.addEventListener('load',function(){if(!location.hash)window.scrollTo(0,0)})}
   var root=document.documentElement;
   root.classList.add('js');
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -624,6 +627,7 @@ footer{border-top:1px solid var(--line);padding-block:32px;color:var(--muted);fo
   var host=location.hostname||'';
   var canEmbed=/^https?:$/.test(location.protocol)&&host&&host.indexOf('claude')===-1&&host!=='localhost'&&host.indexOf('127.')!==0;
   if(canEmbed){
+   function mount(){
     [].forEach.call(document.querySelectorAll('.reel'),function(r){
       var f=document.createElement('iframe');
       f.src='https://www.instagram.com/reel/'+r.getAttribute('data-id')+'/embed/';
@@ -633,6 +637,10 @@ footer{border-top:1px solid var(--line);padding-block:32px;color:var(--muted);fo
       /* 4:3 reel: header ~70px + video at 3/4 of width + footer; Instagram then reports the exact height */
       f.style.height=Math.round(70+fr.clientWidth*0.75+110)+'px';
     });
+   }
+   /* load the players only when the reels are near the screen, so they cannot pull the page away from the top */
+   var rs=document.querySelector('.reels');
+   if('IntersectionObserver' in window&&rs){var mo=new IntersectionObserver(function(es){if(es[0].isIntersecting){mo.disconnect();mount()}},{rootMargin:'600px 0px'});mo.observe(rs)}else{mount()}
     window.addEventListener('message',function(e){
       if(e.origin!=='https://www.instagram.com')return;
       var d=e.data;try{if(typeof d==='string')d=JSON.parse(d)}catch(x){return}

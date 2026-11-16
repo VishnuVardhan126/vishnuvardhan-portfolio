@@ -16,6 +16,7 @@ export const metadata = {
     type: 'website',
   },
   twitter: { card: 'summary_large_image', images: ['/og.jpg'] },
+  verification: { google: 'E1L27HX6FjgN2lTa4bSrZM87tB3EtprKgNMW2DUT_Dk' },
 };
 
 export const viewport = { themeColor: '#F4F1EB' };
